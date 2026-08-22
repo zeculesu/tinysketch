@@ -1,10 +1,6 @@
 #include "CountMinSketch.hpp"
 
 #include <algorithm>
-#include <array>
-#include <cstddef>
-#include <cstdint>
-#include <vector>
 
 static uint32_t hash_with_seed(uint32_t value, uint32_t seed) {
   value ^= seed;
@@ -29,7 +25,7 @@ void CountMinSketch::update(uint32_t value) {
   tables[3][hash3(value)]++;
 }
 
-uint32_t CountMinSketch::query(uint32_t value) const {
+uint32_t CountMinSketch::query(uint32_t value) {
   uint32_t min = std::min({tables[0][hash0(value)], tables[1][hash1(value)],
                            tables[2][hash2(value)], tables[3][hash3(value)]});
   return min;
