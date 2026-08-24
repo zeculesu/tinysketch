@@ -14,6 +14,7 @@ template <typename Sketch> void testCollisionCheck() {
   tinySketch.update(0);
   assert(tinySketch.query(0) == 1);
   tinySketch.update(1443323093);
+  // 0 and 1443323093 have collision in 4 hash
   assert(tinySketch.query(0) == 2);
 }
 

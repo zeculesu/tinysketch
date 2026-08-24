@@ -1,7 +1,7 @@
 #include "TinySketchHardware.hpp"
 #include "VTinySketch.h"
 
-void TinySketchHardware::tick() {
+static void tick_module(VTinySketch &dut) {
   dut.clock = 0;
   dut.eval();
 
@@ -12,38 +12,41 @@ void TinySketchHardware::tick() {
   dut.eval();
 }
 
-TinySketchHardware::TinySketchHardware() {
-  dut.reset = 1;
-  dut.io_update_valid = 0;
-  dut.io_query_valid = 0;
-  dut.io_value = 0;
-  tick();
-  dut.reset = 0;
+TinySketchHardware::TinySketchHardware()
+    : dut(std::make_unique<VTinySketch>()) {
+  dut->reset = 1;
+  tick_module(*dut);
+  dut->reset = 0;
+  dut->io_update_valid = 0;
+  dut->io_query_valid = 0;
+  dut->io_value = 0;
 }
 
+TinySketchHardware::~TinySketchHardware() = default;
+
 void TinySketchHardware::update(uint32_t value) {
-  dut.io_value = value;
-  dut.io_update_valid = 1;
-  tick();
-  dut.io_update_valid = 0;
+  dut->io_value = value;
+  dut->io_update_valid = 1;
+  tick_module(*dut);
+  dut->io_update_valid = 0;
 }
 
 uint32_t TinySketchHardware::query(uint32_t value) {
-  dut.io_value = value;
-  dut.io_query_valid = 1;
+  dut->io_value = value;
+  dut->io_query_valid = 1;
 
-  dut.eval();
+  dut->eval();
 
-  uint32_t result = dut.io_query_result;
+  uint32_t result = dut->io_query_result;
 
-  dut.io_query_valid = 0;
-  dut.eval();
+  dut->io_query_valid = 0;
+  dut->eval();
 
   return result;
 }
 
-void TinySketchHardware::reset(){
-  dut.reset = 1;
-  tick();
-  dut.reset = 0;
+void TinySketchHardware::reset() {
+  dut->reset = 1;
+  tick_module(*dut);
+  dut->reset = 0;
 }

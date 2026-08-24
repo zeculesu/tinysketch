@@ -1,11 +1,15 @@
 #pragma once
 
 #include "TinySketchInterface.hpp"
-#include "VTinySketch.h"
+
+#include <memory>
+
+class VTinySketch;
 
 class TinySketchHardware : public TinySketchInterface {
 public:
   TinySketchHardware();
+  ~TinySketchHardware() override;
 
   void update(uint32_t value) override;
   uint32_t query(uint32_t value) override;
@@ -13,7 +17,5 @@ public:
   void reset();
 
 private:
-  VTinySketch dut;
-
-  void tick();
+  std::unique_ptr<VTinySketch> dut;
 };

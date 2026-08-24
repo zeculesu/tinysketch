@@ -64,6 +64,6 @@ object TinySketch extends App {
   _root_.circt.stage.ChiselStage.emitSystemVerilogFile(
     gen = new TinySketch,
     args = Array("--target-dir", "../rtl"),
-    firtoolOpts = Array("-disable-layers=Verification") // Полностью убирает файлы верификации
+    firtoolOpts = Array("-disable-layers=Verification")
   )
 }

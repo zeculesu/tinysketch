@@ -5,20 +5,20 @@
 #include <array>
 #include <cstddef>
 
-constexpr size_t count_hashes = 4;
-constexpr uint32_t seed_hash1 = 12345;
-constexpr uint32_t seed_hash2 = 67890;
-constexpr uint32_t seed_hash3 = 55555;
-constexpr uint32_t seed_hash4 = 99999;
+static constexpr size_t kHashCount = 4;
+static constexpr uint32_t kHashSeed0 = 12345;
+static constexpr uint32_t kHashSeed1 = 67890;
+static constexpr uint32_t kHashSeed2 = 55555;
+static constexpr uint32_t kHashSeed3 = 99999;
 
-class CountMinSketch : TinySketchInterface {
+class CountMinSketch : public TinySketchInterface {
 public:
   CountMinSketch();
   void update(uint32_t value) override;
   uint32_t query(uint32_t value) override;
 
 private:
-  std::array<std::array<uint32_t, 256>, count_hashes> tables;
+  std::array<std::array<uint32_t, 256>, kHashCount> tables;
 
   uint32_t hash0(uint32_t value) const;
   uint32_t hash1(uint32_t value) const;
