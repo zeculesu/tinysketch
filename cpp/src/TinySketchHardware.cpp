@@ -41,3 +41,9 @@ uint32_t TinySketchHardware::query(uint32_t value) {
 
   return result;
 }
+
+void TinySketchHardware::reset(){
+  dut.reset = 1;
+  tick();
+  dut.reset = 0;
+}
