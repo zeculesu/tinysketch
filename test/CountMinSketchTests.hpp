@@ -9,13 +9,19 @@
 #include <string>
 #include <unordered_map>
 
-template <typename Sketch> void testCollisionCheck() {
-  Sketch tinySketch;
-  tinySketch.update(0);
-  assert(tinySketch.query(0) == 1);
-  tinySketch.update(1443323093);
-  // 0 and 1443323093 have collision in 4 hash
-  assert(tinySketch.query(0) == 2);
+template <typename Sketch>
+void testCollisionCheck() {
+    CountMinSketch<Sketch::ROWS, Sketch::COLUMNS, Sketch::WIDTH> ref;
+    auto [a, b] = ref.findCollidingPair();
+    assert(a != b);
+
+    Sketch tinySketch;
+    tinySketch.update(a);
+    assert(tinySketch.query(a) == 1);
+
+    tinySketch.update(b);
+    assert(tinySketch.query(a) == 2);
+    assert(tinySketch.query(b) == 2);
 }
 
 template <typename Sketch> void testNonUpdatedElement() {
