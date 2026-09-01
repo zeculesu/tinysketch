@@ -6,6 +6,7 @@ declare -a CONFIGS=()
 CONFIGS+=("2 64 8")
 CONFIGS+=("4 256 16")
 CONFIGS+=("4 256 32")
+CONFIGS+=("8 256 64")
 CONFIGS+=("8 1024 16")
 
 for conf in "${CONFIGS[@]}"; do

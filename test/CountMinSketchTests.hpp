@@ -53,7 +53,7 @@ template <typename Sketch> void testIndependentElements() {
   assert(tinySketch.query(42) == 3);
 }
 
-template <typename Sketch> void testExactReference() {
+template <typename Sketch> void testNoUnderestimation() {
   Sketch tinySketch;
   std::unordered_map<uint32_t, uint32_t> exact;
   const size_t NUM_OPERATIONS = 1000;
@@ -84,5 +84,5 @@ template <typename Sketch> void runInvariantTests() {
   runTest(testSingleUpdate<Sketch>, "testSingleUpdate");
   runTest(testMultipleUpdates<Sketch>, "testMultipleUpdates");
   runTest(testIndependentElements<Sketch>, "testIndependentElements");
-  runTest(testExactReference<Sketch>, "testExactReference");
+  runTest(testNoUnderestimation<Sketch>, "testNoUnderestimation");
 }
