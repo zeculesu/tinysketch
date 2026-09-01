@@ -1,21 +1,21 @@
 #!/bin/bash
 set -e
 
-# Массив конфигураций
+# Array of configurations
 declare -a CONFIGS=()
-# CONFIGS+=("2 64 8")
-# CONFIGS+=("4 256 16")
+CONFIGS+=("2 64 8")
+CONFIGS+=("4 256 16")
 CONFIGS+=("4 256 32")
 CONFIGS+=("8 1024 16")
 
-# for conf in "${CONFIGS[@]}"; do
-#     read ROWS COLS WIDTH <<< "$conf"
-#     cd chisel
-#     sbt "run ${ROWS} ${COLS} ${WIDTH}"
-#     cd ../rtl
-#     mv TinySketch.sv TinySketch-${ROWS}x${COLS}x${WIDTH}.sv
-#     cd ..
-# done
+for conf in "${CONFIGS[@]}"; do
+    read ROWS COLS WIDTH <<< "$conf"
+    cd chisel
+    sbt "run ${ROWS} ${COLS} ${WIDTH}"
+    cd ../rtl
+    mv TinySketch.sv TinySketch-${ROWS}x${COLS}x${WIDTH}.sv
+    cd ..
+done
 
 for conf in "${CONFIGS[@]}"; do
     read ROWS COLS WIDTH <<< "$conf"

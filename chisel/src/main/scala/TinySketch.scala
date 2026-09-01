@@ -46,7 +46,7 @@ object HashFunctions {
     tmp = (tmp >> 16) ^ tmp
     tmp = tmp(counterWidth - 1, 0)
 
-    tmp % columns.U
+    tmp & (columns - 1).U
   }
 }
 
