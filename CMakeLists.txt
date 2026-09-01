@@ -12,25 +12,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(RTL_ROWS 4 CACHE STRING "Number of rows")
 set(RTL_COLS 256 CACHE STRING "Number of columns")
 set(RTL_WIDTH 32 CACHE STRING "Counter width")
-set(RTL_SOURCE TinySketch.sv CACHE STRING "RTL source file")
 
 # C++ test configuration (mirrors RTL config)
 set(TEST_ROWS ${RTL_ROWS})
 set(TEST_COLS ${RTL_COLS})
 set(TEST_WIDTH ${RTL_WIDTH})
 
-configure_file(
-    ${CMAKE_SOURCE_DIR}/rtl/${RTL_SOURCE}
-    ${CMAKE_CURRENT_BINARY_DIR}/TinySketch.sv
-    COPYONLY
-)
-
 # Verilator / hardware model
 find_package(verilator REQUIRED)
 add_library(tinysketch-verilator STATIC)
 verilate(tinysketch-verilator
     SOURCES
-        ${CMAKE_SOURCE_DIR}/rtl/${RTL_SOURCE}
+        ${CMAKE_SOURCE_DIR}/rtl/TinySketch.sv
     TOP_MODULE
         TinySketch
 )

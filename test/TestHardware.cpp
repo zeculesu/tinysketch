@@ -16,7 +16,7 @@ void testSoftwareAndHardware() {
 
   std::mt19937 gen(12345);
   std::uniform_int_distribution<value_type> dist;
-
+  
   for (std::size_t i = 0; i < 10000; ++i) {
     auto value = dist(gen);
 

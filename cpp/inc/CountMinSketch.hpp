@@ -16,9 +16,29 @@
 #include <string>
 #include <vector>
 
+namespace fs = std::filesystem;
+static fs::path find_config_path() {
+  std::vector<std::string> potential_paths = {
+      "config/seeds.json", "../config/seeds.json", "../../config/seeds.json"};
+
+  for (const auto &p : potential_paths) {
+    if (fs::exists(p)) {
+      return fs::path(p);
+    }
+  }
+  std::string err_msg =
+      "Critical Error: 'config/seeds.json' not found!\nChecked paths:\n";
+  for (const auto &p : potential_paths) {
+    err_msg += "  - " + fs::absolute(p).string() + "\n";
+  }
+
+  throw std::runtime_error(err_msg);
+}
+
 template <std::size_t Rows> static std::array<uint32_t, Rows> load_seeds() {
   std::array<uint32_t, Rows> seeds{};
-  std::ifstream f("config/seeds.json");
+  fs::path config_path = find_config_path();
+  std::ifstream f(config_path);
   std::string line;
   std::string content;
   while (std::getline(f, line)) {
@@ -75,21 +95,36 @@ public:
     return min;
   }
 
-  std::pair<value_type, value_type> findCollidingPair() {
-    auto limit = static_cast<uint64_t>(std::numeric_limits<value_type>::max());
-    if (limit > 10'000'000ULL)
-      limit = 10'000'000ULL;
-
-    for (uint64_t va = 0; va < limit; ++va) {
-      for (uint64_t vb = va + 1; vb < limit; ++vb) {
-        if (_allRowsMatch(static_cast<value_type>(va),
-                          static_cast<value_type>(vb))) {
-          return {static_cast<value_type>(va), static_cast<value_type>(vb)};
+std::pair<value_type, value_type> findCollidingPair() {
+    std::random_device rd;
+    std::mt19937_64 gen(12345);
+    std::uniform_int_distribution<value_type> dist(
+        0, std::numeric_limits<value_type>::max()
+    );
+    
+    std::unordered_map<std::string, value_type> hash_to_value;
+    
+    for (int attempt = 0; attempt < 1000000; ++attempt) {
+        value_type val = dist(gen);
+        
+        std::string key;
+        for (std::size_t i = 0; i < Rows; ++i) {
+            key += std::to_string(hash_with_seed(val, seeds[i])) + ",";
         }
-      }
+        
+        auto it = hash_to_value.find(key);
+        if (it != hash_to_value.end()) {
+            value_type other = it->second;
+            if (val != other) {
+                return {std::min(val, other), std::max(val, other)};
+            }
+        } else {
+            hash_to_value[key] = val;
+        }
     }
+    
     return {value_type(0), value_type(1)};
-  }
+}
 
 private:
   static value_type hash_with_seed(value_type value, uint32_t seed) {
