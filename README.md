@@ -9,6 +9,25 @@ The generated RTL (`rtl/TinySketch.sv`) is simulated through **Verilator** and v
 
 ---
 
+## Algorithm
+
+Count-Min Sketch estimates value frequencies in a stream using a fixed-size table and multiple hash functions, trading bounded accuracy for memory efficiency.
+
+```
+update(x): each table[hash_i(x)]++
+query(x):  min(table[0][hash0(x)], table[1][hash1(x)], ...)
+```
+
+---
+
+## Architecture
+
+```
+Chisel  ──CIRCT──►  SystemVerilog  ──Verilator──►  C++ hardware model
+ C++ reference                                                │
+      └──────────────────────── comparison tests ◄────────────┘
+```
+
 ## Parameterized Architecture
 
 TinySketch is parameterized by three compile-time / RTL-generation-time parameters:
@@ -20,17 +39,6 @@ TinySketch is parameterized by three compile-time / RTL-generation-time paramete
 | `COUNTER_WIDTH` | Bit-width of each counter    | 8, 16, 32, 64                      |
 
 The same C++ reference model and Chisel hardware implementation share all three parameters.
-
----
-
-## Algorithm
-
-Count-Min Sketch estimates value frequencies in a stream using a fixed-size table and multiple hash functions, trading bounded accuracy for memory efficiency.
-
-```
-update(x): each table[hash_i(x)]++
-query(x):  min(table[0][hash0(x)], table[1][hash1(x)], ...)
-```
 
 ---
 
@@ -145,7 +153,7 @@ Since the total number of possible hash signatures is $2^{R \times \log_2(C)}$ (
 
 ### Requirements
 
-CMake 3.16+, C++20 compiler (gcc/clang), Verilator 5+, JDK 11+, sbt 1.10+, Chisel.
+CMake 3.16+, C++20 compiler, Verilator 5+, JDK 11+, sbt 1.10+, Scala 2.13.18, Chisel 7.6.0
 
 ### Build single configuration
 
