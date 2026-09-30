@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <string>
 #include <unordered_map>
@@ -80,6 +81,35 @@ template <typename Sketch> void testNoUnderestimation() {
   }
 }
 
+
+template <typename Sketch> void testBoundaryValues() {
+  using value_type = typename Sketch::value_type;
+  constexpr auto MAX = std::numeric_limits<value_type>::max();
+  
+  Sketch tinySketch;
+  tinySketch.update(0);
+  assert(tinySketch.query(0) == 1);
+  
+  tinySketch.update(0);
+  assert(tinySketch.query(0) == 2);
+  
+  tinySketch.update(1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+  
+  value_type max_minus_1 = MAX - 1;
+  tinySketch.update(max_minus_1);
+  assert(tinySketch.query(max_minus_1) == 1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+  
+  tinySketch.update(MAX);
+  assert(tinySketch.query(MAX) == 1);
+  assert(tinySketch.query(max_minus_1) == 1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+}
+
 inline void runTest(auto f, const std::string &testName) {
   std::cout << "Start " << testName << ": ";
   f();
@@ -93,4 +123,5 @@ template <typename Sketch> void runInvariantTests() {
   runTest(testMultipleUpdates<Sketch>, "testMultipleUpdates");
   runTest(testIndependentElements<Sketch>, "testIndependentElements");
   runTest(testNoUnderestimation<Sketch>, "testNoUnderestimation");
+  runTest(testBoundaryValues<Sketch>, "testBoundaryValues Software");
 }

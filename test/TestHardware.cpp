@@ -76,7 +76,5 @@ int main() {
 
   runTest(testReset<Sketch>, "testReset");
 
-  runTest(testReset<TinySketchHardware<ROWS, COLS, WIDTH>>, "testReset");
-  
   return 0;
 }
