@@ -1,24 +1,26 @@
 #include "CountMinSketch.hpp"
 #include "CountMinSketchTests.hpp"
+#include "DataGenerator.hpp"
 #include "TinySketchHardware.hpp"
 
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <random>
+#include <string>
 
 template <std::size_t Rows, std::size_t Cols, std::size_t Width>
-void testSoftwareAndHardware() {
+void testSoftwareAndHardware(WorkloadType workload) {
   using value_type = typename CountMinSketch<Rows, Cols, Width>::value_type;
 
   CountMinSketch<Rows, Cols, Width> software;
   TinySketchHardware<Rows, Cols, Width> hardware;
 
-  std::mt19937 gen(12345);
-  std::uniform_int_distribution<value_type> dist;
-  
-  for (std::size_t i = 0; i < 10000; ++i) {
-    auto value = dist(gen);
+  DataGenerator<value_type> gen;
+  auto data = gen.generate(workload);
+
+  for (std::size_t i = 0; i < data.size(); ++i) {
+    auto value = data[i];
 
     software.update(value);
     hardware.update(value);
@@ -28,7 +30,7 @@ void testSoftwareAndHardware() {
 
     if (expected != actual) {
       std::cout << "Mismatch at operation " << i << "\n";
-      std::cout << "value: " << value << "\n";
+      std::cout << "value:    " << value << "\n";
       std::cout << "software: " << expected << "\n";
       std::cout << "hardware: " << actual << "\n";
       assert(false);
@@ -53,14 +55,26 @@ int main() {
   constexpr auto ROWS = TINY_ROWS;
   constexpr auto COLS = TINY_COLS;
   constexpr auto WIDTH = TINY_WIDTH;
+
   std::cout << "Config: " << ROWS << "x" << COLS << "x" << WIDTH << "\n";
 
   runInvariantTests<TinySketchHardware<ROWS, COLS, WIDTH>>();
 
-  runTest(testSoftwareAndHardware<TINY_ROWS, TINY_COLS, TINY_WIDTH>,
-          "testSoftwareAndHardware");
+  using Sketch = TinySketchHardware<ROWS, COLS, WIDTH>;
 
-  runTest(testReset<TinySketchHardware<ROWS, COLS, WIDTH>>, "testReset");
+  runTest(
+      [] { testSoftwareAndHardware<ROWS, COLS, WIDTH>(WorkloadType::Uniform); },
+      "testSoftwareAndHardware Uniform Workload");
+  runTest(
+      [] {
+        testSoftwareAndHardware<ROWS, COLS, WIDTH>(WorkloadType::HeavyHitters);
+      },
+      "testSoftwareAndHardware Heavy Hitters Workload");
+  runTest(
+      [] { testSoftwareAndHardware<ROWS, COLS, WIDTH>(WorkloadType::Skewed); },
+      "testSoftwareAndHardware Skewed Workload");
+
+  runTest(testReset<Sketch>, "testReset");
 
   return 0;
 }

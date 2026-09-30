@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace fs = std::filesystem;
 static fs::path find_config_path() {
@@ -95,7 +96,7 @@ public:
     return min;
   }
 
-std::pair<value_type, value_type> findCollidingPair() {
+std::optional<std::pair<value_type, value_type>> findCollidingPair() {
     std::random_device rd;
     std::mt19937_64 gen(12345);
     std::uniform_int_distribution<value_type> dist(
@@ -116,14 +117,14 @@ std::pair<value_type, value_type> findCollidingPair() {
         if (it != hash_to_value.end()) {
             value_type other = it->second;
             if (val != other) {
-                return {std::min(val, other), std::max(val, other)};
+                return std::make_pair(std::min(val, other), std::max(val, other));
             }
         } else {
             hash_to_value[key] = val;
         }
     }
     
-    return {value_type(0), value_type(1)};
+    return std::nullopt;
 }
 
 private:

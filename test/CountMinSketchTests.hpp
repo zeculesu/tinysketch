@@ -5,23 +5,32 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <string>
 #include <unordered_map>
 
-template <typename Sketch>
-void testCollisionCheck() {
-    CountMinSketch<Sketch::ROWS, Sketch::COLUMNS, Sketch::WIDTH> ref;
-    auto [a, b] = ref.findCollidingPair();
-    assert(a != b);
+template <typename Sketch> void testCollisionCheck() {
+  CountMinSketch<Sketch::ROWS, Sketch::COLUMNS, Sketch::WIDTH> ref;
+  auto pair = ref.findCollidingPair();
+  if (!pair) {
+    std::cout << "SKIP: could not find a full-row "
+                 "collision for config "
+              << Sketch::ROWS << "x" << Sketch::COLUMNS << "x" << Sketch::WIDTH
+              << " (key space " << Sketch::COLUMNS << "^" << Sketch::ROWS
+              << " is too large for birthday search). Test skipped.\n";
+    return;
+  }
+  auto a = pair->first;
+  auto b = pair->second;
 
-    Sketch tinySketch;
-    tinySketch.update(a);
-    assert(tinySketch.query(a) == 1);
+  Sketch tinySketch;
+  tinySketch.update(a);
+  assert(tinySketch.query(a) == 1);
 
-    tinySketch.update(b);
-    assert(tinySketch.query(a) == 2);
-    assert(tinySketch.query(b) == 2);
+  tinySketch.update(b);
+  assert(tinySketch.query(a) == 2);
+  assert(tinySketch.query(b) == 2);
 }
 
 template <typename Sketch> void testNonUpdatedElement() {
@@ -72,6 +81,35 @@ template <typename Sketch> void testNoUnderestimation() {
   }
 }
 
+
+template <typename Sketch> void testBoundaryValues() {
+  using value_type = typename Sketch::value_type;
+  constexpr auto MAX = std::numeric_limits<value_type>::max();
+  
+  Sketch tinySketch;
+  tinySketch.update(0);
+  assert(tinySketch.query(0) == 1);
+  
+  tinySketch.update(0);
+  assert(tinySketch.query(0) == 2);
+  
+  tinySketch.update(1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+  
+  value_type max_minus_1 = MAX - 1;
+  tinySketch.update(max_minus_1);
+  assert(tinySketch.query(max_minus_1) == 1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+  
+  tinySketch.update(MAX);
+  assert(tinySketch.query(MAX) == 1);
+  assert(tinySketch.query(max_minus_1) == 1);
+  assert(tinySketch.query(1) == 1);
+  assert(tinySketch.query(0) == 2);
+}
+
 inline void runTest(auto f, const std::string &testName) {
   std::cout << "Start " << testName << ": ";
   f();
@@ -85,4 +123,5 @@ template <typename Sketch> void runInvariantTests() {
   runTest(testMultipleUpdates<Sketch>, "testMultipleUpdates");
   runTest(testIndependentElements<Sketch>, "testIndependentElements");
   runTest(testNoUnderestimation<Sketch>, "testNoUnderestimation");
+  runTest(testBoundaryValues<Sketch>, "testBoundaryValues Software");
 }
