@@ -122,6 +122,7 @@ cpp/inc/CountMinSketch.hpp               -- Parameterized C++ reference
 cpp/inc/TinySketchHardware.hpp           -- Verilator C++ wrapper
 cpp/inc/TinySketchInterface.hpp          -- Base class + static_assert constraints
 test/CountMinSketchTests.hpp             -- Shared invariant tests
+test/DataGenerator.hpp                   -- Workload generators (uniform / heavy hitters / skewed)
 test/TestSoftware.cpp                    -- Software tests (C++ only)
 test/TestHardware.cpp                    -- Hardware + cross-verification tests
 test/CMakeLists.txt                      -- Test build + compile definitions
@@ -140,6 +141,18 @@ run_all.sh                               -- Batch RTL generation + test for mult
 
 **`test_hardware`** — the same invariant tests on Verilated RTL, plus
 differential testing against the C++ reference implementation.
+
+### Workloads
+
+`testSoftwareAndHardware` runs the software/hardware cross-check over three
+input distributions to confirm correctness is independent of the stream's
+character: **Uniform**, **Heavy hitters**, and **Skewed**.
+
+### Input boundaries
+
+`testBoundaryValues` checks `update`/`query` on the edge inputs
+`0`, `1`, `UINT32_MAX - 1`, and `UINT32_MAX`, identically for both software
+and hardware.
 
 ### Collision detection
 
